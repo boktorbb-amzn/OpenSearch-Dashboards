@@ -251,7 +251,8 @@ export const createOsdUrlControls = (
  * 4. Hash history with base path
  */
 export function getRelativeToHistoryPath(absoluteUrl: string, history: History): History.Path {
-  function stripBasename(path: string = '') {
+  function stripBasename(path: string | null) {
+    if (path === null) path = '';
     const stripLeadingHash = (_: string) => (_.charAt(0) === '#' ? _.substr(1) : _);
     const stripTrailingSlash = (_: string) =>
       _.charAt(_.length - 1) === '/' ? _.substr(0, _.length - 1) : _;
@@ -263,7 +264,7 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
   const parsedHash = isHashHistory ? null : parseUrlHash(absoluteUrl);
 
   return formatUrl({
-    pathname: stripBasename(parsedUrl.pathname),
+    pathname: stripBasename(parsedUrl.pathname ?? null),
     search: stringify(urlUtils.encodeQuery(parsedUrl.query), { sort: false, encode: false }),
     hash: parsedHash
       ? formatUrl({

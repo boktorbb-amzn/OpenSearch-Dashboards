@@ -104,9 +104,9 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   });
 
   if (stdin) {
-    childProcess.stdin.end(stdin, 'utf8');
+    childProcess.stdin!.end(stdin, 'utf8'); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdin will not be null
   } else {
-    childProcess.stdin.end();
+    childProcess.stdin!.end(); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdin will not be null
   }
 
   let stopCalled = false;
@@ -136,8 +136,8 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   ).pipe(share());
 
   const lines$ = Rx.merge(
-    observeLines(childProcess.stdout),
-    observeLines(childProcess.stderr)
+    observeLines(childProcess.stdout!), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdin will not be null
+    observeLines(childProcess.stderr!) // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdin will not be null
   ).pipe(
     tap((line) => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
     share()
