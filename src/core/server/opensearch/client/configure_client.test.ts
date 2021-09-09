@@ -333,7 +333,6 @@ describe('configureClient', () => {
         );
 
         const response = createResponseWithBody(
-          // @ts-expect-error definition doesn't know about from
           Readable.from(
             JSON.stringify({
               seq_no_primary_term: true,

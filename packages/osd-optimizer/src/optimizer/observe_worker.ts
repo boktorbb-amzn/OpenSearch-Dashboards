@@ -177,7 +177,8 @@ export function observeWorker(
         type: 'worker started',
         bundles,
       }),
-      observeStdio$(proc.stdout).pipe(
+      // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+      observeStdio$(proc.stdout!).pipe(
         map(
           (line): WorkerStdio => ({
             type: 'worker stdio',
@@ -186,7 +187,8 @@ export function observeWorker(
           })
         )
       ),
-      observeStdio$(proc.stderr).pipe(
+      // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+      observeStdio$(proc.stderr!).pipe(
         map(
           (line): WorkerStdio => ({
             type: 'worker stdio',
