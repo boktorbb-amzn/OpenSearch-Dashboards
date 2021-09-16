@@ -75,7 +75,7 @@
   },
   "resolutions": {
     "**/axios": "^0.21.4",
-    "**/@types/node": "12.20.24",
+    "**/@types/node": "16.9.1",
     "**/ejs": "^3.1.6",
     "**/front-matter": "^4.0.2",
     "**/glob-parent": "^6.0.0",
@@ -154,7 +154,7 @@
     "deep-freeze-strict": "^1.1.1",
     "del": "^5.1.0",
     "dns-sync": "^0.2.1",
-    "elastic-apm-node": "^3.7.0",
+    "elastic-apm-node": "^3.20.0",
     "elasticsearch": "^16.7.0",
     "execa": "^4.0.2",
     "expiry-js": "0.1.7",
@@ -302,7 +302,7 @@
     "@types/mock-fs": "^4.10.0",
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
-    "@types/node": "12.20.24",
+    "@types/node": "16.9.1",
     "@types/node-forge": "^0.9.5",
     "@types/normalize-path": "^3.0.0",
     "@types/pegjs": "^0.10.1",
@@ -415,6 +415,7 @@
     "less": "npm:@elastic/less@2.7.3-kibana",
     "license-checker": "^16.0.0",
     "listr": "^0.14.1",
+    "lmdb-store": "^1.6.7",
     "load-grunt-config": "^3.0.1",
     "load-json-file": "^6.2.0",
     "markdown-it": "^10.0.0",
@@ -426,6 +427,7 @@
     "mutation-observer": "^1.0.3",
     "ngreact": "^0.5.1",
     "nock": "12.0.3",
+    "node-sass": "^6.0.1",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
     "pixelmatch": "^5.1.0",
@@ -446,6 +448,7 @@
     "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.0",
     "sass-lint": "^1.12.1",
+    "sass-loader": "^10.2.0",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "simple-git": "1.116.0",
     "sinon": "^7.4.2",
@@ -455,6 +458,7 @@
     "tape": "^5.0.1",
     "topojson-client": "3.0.0",
     "tree-kill": "^1.2.2",
+    "tslib": "^2.0.0",
     "typescript": "4.0.2",
     "ui-select": "0.19.8",
     "vega": "^5.17.3",
@@ -467,7 +471,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "12.22.6",
+    "node": "16.9.1",
     "yarn": "^1.21.1"
   }
 }
