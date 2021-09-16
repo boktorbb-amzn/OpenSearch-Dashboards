@@ -30,16 +30,16 @@
  * GitHub history for details.
  */
 
-import Path from 'path';
+// import Path from 'path';
 
-// @ts-expect-error no types available
 import * as LmdbStore from 'lmdb-store';
-import { REPO_ROOT, UPSTREAM_BRANCH } from '@osd/dev-utils';
+// import { REPO_ROOT, UPSTREAM_BRANCH } from '@osd/dev-utils';
 
 // This is to enable parallel jobs on CI.
-const CACHE_DIR = process.env.CACHE_DIR
+/* const CACHE_DIR = process.env.CACHE_DIR
   ? Path.resolve(REPO_ROOT, process.env.CACHE_DIR)
   : Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
+*/
 
 const reportError = () => {
   // right now I'm not sure we need to worry about errors, the cache isn't actually
@@ -54,7 +54,8 @@ const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
-interface Lmdb<T> {
+/*
+  interface Lmdb<T> {
   get(key: string): T | undefined;
   put(key: string, value: T, version?: number, ifVersion?: number): Promise<boolean>;
   remove(key: string, ifVersion?: number): Promise<boolean>;
@@ -67,36 +68,37 @@ interface Lmdb<T> {
     versions?: boolean;
   }): Iterable<{ key: string; value: T }>;
 }
+*/
 
 export class Cache {
-  private readonly codes: Lmdb<string>;
-  private readonly atimes: Lmdb<string>;
-  private readonly mtimes: Lmdb<string>;
-  private readonly sourceMaps: Lmdb<any>;
+  private readonly codes: LmdbStore.RootDatabase<string, string>;
+  private readonly atimes: LmdbStore.Database<string, string>;
+  private readonly mtimes: LmdbStore.Database<string, string>;
+  private readonly sourceMaps: LmdbStore.Database<string, string>;
   private readonly prefix: string;
 
-  constructor(config: { prefix: string }) {
+  constructor(config: { prefix: string; dir: string }) {
     this.prefix = config.prefix;
 
-    this.codes = LmdbStore.open({
+    this.codes = LmdbStore.open(config.dir, {
       name: 'codes',
-      path: CACHE_DIR,
+      encoding: 'string',
       maxReaders: 500,
     });
 
-    this.atimes = this.codes.openDB({
+    this.atimes = this.codes.openDB('attimes', {
       name: 'atimes',
       encoding: 'string',
     });
 
-    this.mtimes = this.codes.openDB({
+    this.mtimes = this.codes.openDB('mtimes', {
       name: 'mtimes',
       encoding: 'string',
     });
 
-    this.sourceMaps = this.codes.openDB({
+    this.sourceMaps = this.codes.openDB('sourceMaps', {
       name: 'sourceMaps',
-      encoding: 'msgpack',
+      encoding: 'string',
     });
 
     // after the process has been running for 30 minutes prune the
@@ -109,37 +111,60 @@ export class Cache {
   }
 
   getMtime(path: string) {
-    return this.mtimes.get(this.getKey(path));
+    return this.sGet(this.mtimes, this.getKey(path));
   }
 
   getCode(path: string) {
     const key = this.getKey(path);
+    const code = this.sGet(this.codes, key);
 
-    // when we use a file from the cache set the "atime" of that cache entry
-    // so that we know which cache items we use and which haven't been
-    // touched in a long time (currently 30 days)
-    this.atimes.put(key, GLOBAL_ATIME).catch(reportError);
+    if (code !== undefined) {
+      // when we use a file from the cache set the "atime" of that cache entry
+      // so that we know which cache items we use and which haven't been
+      // touched in a long time (currently 30 days)
+      this.sPut(this.atimes, key, GLOBAL_ATIME);
+    }
 
-    return this.codes.get(key);
+    return code;
   }
 
   getSourceMap(path: string) {
-    return this.sourceMaps.get(this.getKey(path));
+    const map = this.sGet(this.sourceMaps, this.getKey(path));
+    if (typeof map === 'string') {
+      return JSON.parse(map);
+    }
   }
 
-  update(path: string, file: { mtime: string; code: string; map: any }) {
+  async update(path: string, file: { mtime: string; code: string; map: any }) {
     const key = this.getKey(path);
 
-    Promise.all([
-      this.atimes.put(key, GLOBAL_ATIME),
-      this.mtimes.put(key, file.mtime),
-      this.codes.put(key, file.code),
-      this.sourceMaps.put(key, file.map),
+    await Promise.all([
+      this.sPut(this.atimes, key, GLOBAL_ATIME),
+      this.sPut(this.mtimes, key, file.mtime),
+      this.sPut(this.codes, key, file.code),
+      this.sPut(this.sourceMaps, key, JSON.stringify(file.map)),
     ]).catch(reportError);
   }
 
   private getKey(path: string) {
     return `${this.prefix}${path}`;
+  }
+
+  private sGet<V>(db: LmdbStore.Database<V, string>, key: string) {
+    try {
+      const value = db.get(key);
+      return value;
+    } catch (error) {
+      // console.log('GET', db, key, error);
+    }
+  }
+
+  private async sPut<V>(db: LmdbStore.Database<V, string>, key: string, value: V) {
+    try {
+      await db.put(key, value);
+    } catch (error) {
+      // console.log('PUT', db, key, error);
+    }
   }
 
   private async pruneOldKeys() {
@@ -150,9 +175,10 @@ export class Cache {
       const validKeys: string[] = [];
       const invalidKeys: string[] = [];
 
+      // @ts-expect-error https://github.com/DoctorEvidence/lmdb-store/pull/18
       for (const { key, value } of this.atimes.getRange()) {
-        const atime = parseInt(value, 10);
-        if (atime < ATIME_LIMIT) {
+        const atime = parseInt(`${value}`, 10);
+        if (Number.isNaN(atime) || atime < ATIME_LIMIT) {
           invalidKeys.push(key);
         } else {
           validKeys.push(key);
