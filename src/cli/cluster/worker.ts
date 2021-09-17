@@ -41,7 +41,6 @@ const cliPath = fromRoot('src/cli/dev');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
-// @ts-expect-error
 export type ClusterWorker = cluster.Worker & {
   killed: boolean;
   exitCode?: number;
