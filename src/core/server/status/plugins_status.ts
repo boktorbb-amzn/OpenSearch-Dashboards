@@ -50,7 +50,7 @@ export class PluginsStatusService {
 
   constructor(private readonly deps: Deps) {
     this.defaultInheritedStatus$ = this.deps.core$.pipe(
-      map((coreStatus) => {
+      map((coreStatus: any) => {
         return getSummaryStatus(Object.entries(coreStatus), {
           allAvailableSummary: `All dependencies are available`,
         });
@@ -107,6 +107,7 @@ export class PluginsStatusService {
       return of({});
     }
 
+    // @ts-expect-error
     return this.update$.pipe(
       switchMap(() => {
         const pluginStatuses = plugins

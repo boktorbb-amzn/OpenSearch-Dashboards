@@ -97,6 +97,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;
       }),
+      // @ts-expect-error
       distinctUntilChanged(isDeepStrictEqual),
       shareReplay(1)
     );
@@ -147,10 +148,11 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     savedObjects,
   }: Pick<SetupDeps, 'opensearch' | 'savedObjects'>): Observable<CoreStatus> {
     return combineLatest([opensearch.status$, savedObjects.status$]).pipe(
-      map(([opensearchStatus, savedObjectsStatus]) => ({
+      map(([opensearchStatus, savedObjectsStatus]: any) => ({
         opensearch: opensearchStatus,
         savedObjects: savedObjectsStatus,
       })),
+      // @ts-expect-error
       distinctUntilChanged(isDeepStrictEqual),
       shareReplay(1)
     );
