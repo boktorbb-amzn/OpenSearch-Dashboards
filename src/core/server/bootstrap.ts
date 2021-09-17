@@ -31,7 +31,7 @@
  */
 
 import chalk from 'chalk';
-import { isMaster } from 'cluster';
+import isMaster from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
@@ -97,7 +97,7 @@ export async function bootstrap({
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
-  process.on('message', (msg) => {
+  process.on('message', (msg: any) => {
     if (!msg || msg.reloadLoggingConfig !== true) {
       return;
     }
