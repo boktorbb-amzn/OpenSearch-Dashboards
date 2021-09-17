@@ -336,7 +336,7 @@
     "@types/vinyl": "^2.0.4",
     "@types/vinyl-fs": "^2.4.11",
     "@types/webpack": "^4.41.3",
-    "@types/webpack-env": "^1.15.2",
+    "@types/webpack-env": "^1.15.3",
     "@types/zen-observable": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "^3.10.0",
     "@typescript-eslint/parser": "^3.10.0",
