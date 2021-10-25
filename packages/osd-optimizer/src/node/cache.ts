@@ -33,6 +33,9 @@
 // import Path from 'path';
 
 import * as LmdbStore from 'lmdb-store';
+import { Writable } from 'stream';
+import Path from 'path';
+import chalk from 'chalk';
 // import { REPO_ROOT, UPSTREAM_BRANCH } from '@osd/dev-utils';
 
 // This is to enable parallel jobs on CI.
@@ -53,6 +56,8 @@ const GLOBAL_ATIME = `${Date.now()}`;
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
+
+const dbName = (db: LmdbStore.Database) => db.eventNames;
 
 /*
   interface Lmdb<T> {
@@ -76,9 +81,17 @@ export class Cache {
   private readonly mtimes: LmdbStore.Database<string, string>;
   private readonly sourceMaps: LmdbStore.Database<string, string>;
   private readonly prefix: string;
+  private readonly pathRoot: string;
+  private readonly log?: Writable;
+  private readonly timer: NodeJS.Timer;
 
-  constructor(config: { prefix: string; dir: string }) {
+  constructor(config: { prefix: string; pathRoot: string; dir: string; log?: Writable }) {
+    if (!Path.isAbsolute(config.pathRoot)) {
+      throw new Error('cache requires an absolute path to resolve paths relative to');
+    }
+    this.pathRoot = config.pathRoot;
     this.prefix = config.prefix;
+    this.log = config.log;
 
     this.codes = LmdbStore.open(config.dir, {
       name: 'codes',
@@ -101,6 +114,14 @@ export class Cache {
       encoding: 'string',
     });
 
+    this.timer = setTimeout(() => {
+      this.pruneOldKeys();
+    }, 30 * MINUTE);
+
+    if (typeof this.timer.unref === 'function') {
+      this.timer.unref();
+    }
+    /*
     // after the process has been running for 30 minutes prune the
     // keys which haven't been used in 30 days. We use `unref()` to
     // make sure this timer doesn't hold other processes open
@@ -108,6 +129,7 @@ export class Cache {
     setTimeout(() => {
       this.pruneOldKeys();
     }, 30 * MINUTE).unref();
+    */
   }
 
   getMtime(path: string) {
@@ -146,25 +168,53 @@ export class Cache {
     ]).catch(reportError);
   }
 
+  close() {
+    clearTimeout(this.timer);
+  }
+
   private getKey(path: string) {
-    return `${this.prefix}${path}`;
+    const normalizedPath =
+      Path.sep !== '/'
+        ? Path.relative(this.pathRoot, path).split(Path.sep).join('/')
+        : Path.relative(this.pathRoot, path);
+
+    return `${this.prefix}${normalizedPath}`;
   }
 
   private sGet<V>(db: LmdbStore.Database<V, string>, key: string) {
     try {
       const value = db.get(key);
+      this.debug(value === undefined ? 'MISS' : 'HIT', db, key);
       return value;
     } catch (error) {
       // console.log('GET', db, key, error);
+      this.logError('GET', db, key, error);
     }
   }
 
   private async sPut<V>(db: LmdbStore.Database<V, string>, key: string, value: V) {
     try {
       await db.put(key, value);
+      this.debug('PUT', db, key);
     } catch (error) {
       // console.log('PUT', db, key, error);
+      this.logError('PUT', db, key, error);
     }
+  }
+
+  private debug(type: string, db: LmdbStore.Database, key: LmdbStore.Key) {
+    if (this.log) {
+      this.log.write(`${type}  [${dbName(db)}]  ${String(key)}\n`);
+    }
+  }
+
+  private logError(type: 'GET' | 'PUT', db: LmdbStore.Database, key: LmdbStore.Key, error: Error) {
+    this.debug(`ERROR/${type}`, db, `${String(key)}: ${error.stack}`);
+    process.stderr.write(
+      chalk.red(
+        `[@osd/optimizer/node] ${type} error [${dbName(db)}/${String(key)}]: ${error.stack}\n`
+      )
+    );
   }
 
   private async pruneOldKeys() {

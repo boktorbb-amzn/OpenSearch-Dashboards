@@ -267,7 +267,6 @@ export class Server {
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
-
     await this.legacy.start({
       core: {
         ...this.coreStart,

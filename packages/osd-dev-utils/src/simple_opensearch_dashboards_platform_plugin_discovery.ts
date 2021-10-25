@@ -57,11 +57,10 @@ export function simpleOpenSearchDashboardsPlatformPluginDiscovery(
         ],
         []
       ),
-      ...pluginPaths.map((path) => Path.resolve(path, `opensearch_dashboards.json`)),
+      ...pluginPaths.map((path: any) => Path.resolve(path, `opensearch_dashboards.json`)),
     ])
   );
-
-  const manifestPaths = globby.sync(patterns, { absolute: true }).map((path) =>
+  const manifestPaths = globby.sync(patterns, { absolute: true }).map((path: any) =>
     // absolute paths returned from globby are using normalize or
     // something so the path separators are `/` even on windows,
     // Path.resolve solves this

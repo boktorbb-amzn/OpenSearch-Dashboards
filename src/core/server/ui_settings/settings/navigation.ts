@@ -43,7 +43,7 @@ export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
       }),
       value: '/app/home',
       schema: schema.string({
-        validate(value) {
+        validate(value: any) {
           if (!value.startsWith('/') || !isRelativeUrl(value)) {
             return i18n.translate(
               'core.ui_settings.params.defaultRoute.defaultRouteIsRelativeValidationMessage',

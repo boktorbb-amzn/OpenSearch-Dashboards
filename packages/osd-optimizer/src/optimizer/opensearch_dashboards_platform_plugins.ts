@@ -58,7 +58,6 @@ export function findOpenSearchDashboardsPlatformPlugins(scanDirs: string[], path
         }
         extraPublicDirs = manifest.extraPublicDirs;
       }
-
       return {
         directory,
         manifestPath,

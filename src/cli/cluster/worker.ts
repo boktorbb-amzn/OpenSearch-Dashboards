@@ -46,11 +46,18 @@ export type ClusterWorker = cluster.Worker & {
   exitCode?: number;
 };
 
+if (cluster.isPrimary) {
+  cluster.setupPrimary({
+    exec: cliPath,
+    silent: false,
+  });
+}
+/*
 cluster.setupPrimary({
   exec: cliPath,
   silent: false,
 });
-
+*/
 const dead = (fork: ClusterWorker) => {
   return fork.isDead() || fork.killed;
 };
@@ -204,31 +211,31 @@ export class Worker extends EventEmitter {
       // once "exit" event is received with 0 status, start() is called again
       this.shutdown();
       await new Promise((cb) => this.once('online', cb));
-      return;
     }
 
-    if (this.changes.length) {
-      this.log.warn(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
-    } else if (this.startCount++) {
-      this.log.warn(`restarting ${this.title}...`);
+    if (cluster.isPrimary) {
+      if (this.changes.length) {
+        this.log.warn(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
+      } else if (this.startCount++) {
+        this.log.warn(`restarting ${this.title}...`);
+      }
+
+      this.fork = cluster.fork(this.env) as ClusterWorker;
+      this.emit('starting');
+      this.forkBinder = new BinderFor(this.fork);
+
+      // when the fork sends a message, comes online, or loses its connection, then react
+      this.forkBinder.on('message', (msg: any) => this.parseIncomingMessage(msg));
+      this.forkBinder.on('online', () => this.onOnline());
+      this.forkBinder.on('disconnect', () => this.onDisconnect());
+      // when the cluster says a fork has exited, check if it is ours
+      this.clusterBinder.on('exit', (fork: ClusterWorker, code: number) => this.onExit(fork, code));
+
+      // when the process exits, make sure we kill our workers
+      this.processBinder.on('exit', () => this.shutdown());
+
+      // wait for the fork to report it is online before resolving
+      await new Promise((cb) => this.once('fork:online', cb));
     }
-
-    this.fork = cluster.fork(this.env) as ClusterWorker;
-    this.emit('starting');
-    this.forkBinder = new BinderFor(this.fork);
-
-    // when the fork sends a message, comes online, or loses its connection, then react
-    this.forkBinder.on('message', (msg: any) => this.parseIncomingMessage(msg));
-    this.forkBinder.on('online', () => this.onOnline());
-    this.forkBinder.on('disconnect', () => this.onDisconnect());
-
-    // when the cluster says a fork has exited, check if it is ours
-    this.clusterBinder.on('exit', (fork: ClusterWorker, code: number) => this.onExit(fork, code));
-
-    // when the process exits, make sure we kill our workers
-    this.processBinder.on('exit', () => this.shutdown());
-
-    // wait for the fork to report it is online before resolving
-    await new Promise((cb) => this.once('fork:online', cb));
   }
 }
