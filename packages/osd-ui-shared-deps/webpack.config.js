@@ -118,16 +118,16 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     },
     extensions: ['.js', '.ts'],
     fallback: {
-      "fs": false,
-      "tls": false,
-      "net": false,
-      "path": false,
-      "zlib": false,
-      "http": false,
-      "https": false,
-      "stream": false,
-      "crypto": false
-    }
+      fs: false,
+      tls: false,
+      net: false,
+      path: false,
+      zlib: false,
+      http: false,
+      https: false,
+      stream: false,
+      crypto: false,
+    },
   },
 
   optimization: {
@@ -161,18 +161,18 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     ...(dev
       ? []
       : [
-        new CompressionPlugin({
-          algorithm: 'brotliCompress',
-          filename: '[path].br',
-          test: /\.(js|css)$/,
-          cache: false,
-        }),
-        new CompressionPlugin({
-          algorithm: 'gzip',
-          filename: '[path].gz',
-          test: /\.(js|css)$/,
-          cache: false,
-        }),
-      ]),
+          new CompressionPlugin({
+            algorithm: 'brotliCompress',
+            filename: '[path].br',
+            test: /\.(js|css)$/,
+            cache: false,
+          }),
+          new CompressionPlugin({
+            algorithm: 'gzip',
+            filename: '[path].gz',
+            test: /\.(js|css)$/,
+            cache: false,
+          }),
+        ]),
   ],
 });

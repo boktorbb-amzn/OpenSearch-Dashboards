@@ -51,7 +51,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
-    //node: { fs: 'empty' },
+    // node: { fs: 'empty' },
     context: bundle.contextDir,
     cache: true,
     entry: {
@@ -228,15 +228,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
       fallback: {
-        "fs": false,
-        "tls": false,
-        "net": false,
-        "path": false,
-        "zlib": false,
-        "http": false,
-        "https": false,
-        "stream": false,
-        "crypto": false
+        fs: false,
+        tls: false,
+        net: false,
+        path: false,
+        zlib: false,
+        http: false,
+        https: false,
+        stream: false,
+        crypto: false,
       },
       mainFields: ['browser', 'main'],
       alias: {
