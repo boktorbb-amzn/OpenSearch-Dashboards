@@ -53,7 +53,7 @@ export function readLimits(): Limits {
     }
   }
 
-  return yaml ? Yaml.safeLoad(yaml) : {};
+  return yaml ? (Yaml.safeLoad(yaml) as any) : {};
 }
 
 export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
