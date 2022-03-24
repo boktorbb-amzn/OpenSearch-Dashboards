@@ -93,7 +93,7 @@ describe('RenderingService', () => {
       it('renders "core" page', async () => {
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
@@ -103,7 +103,7 @@ describe('RenderingService', () => {
 
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
@@ -112,7 +112,7 @@ describe('RenderingService', () => {
         uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
@@ -122,7 +122,7 @@ describe('RenderingService', () => {
           includeUserSettings: false,
         });
         const dom = load(content);
-        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
@@ -130,7 +130,7 @@ describe('RenderingService', () => {
       it('renders "core" from legacy request', async () => {
         const content = await render(createRawRequest(), uiSettings);
         const dom = load(content);
-        const data = JSON.parse(dom('osd-injected-metadata').attr('data'));
+        const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
