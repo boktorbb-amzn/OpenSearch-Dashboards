@@ -47,7 +47,7 @@ const actualVersion = pkg.version;
 const versionHeader = 'osd-version';
 const xsrfHeader = 'osd-xsrf';
 const nameHeader = 'osd-name';
-const whitelistedTestPath = '/xsrf/test/route/whitelisted';
+const allowlistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const opensearchDashboardsName = 'my-opensearch-dashboards-name';
 const setupDeps = {
@@ -74,7 +74,7 @@ describe('core lifecycle handlers', () => {
         customResponseHeaders: {
           'some-header': 'some-value',
         },
-        xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
+        xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
         requestId: {
           allowFromAnyIp: true,
           ipAllowlist: [],
@@ -190,7 +190,7 @@ describe('core lifecycle handlers', () => {
           }
         );
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
-          { path: whitelistedTestPath, validate: false },
+          { path: allowlistedTestPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
@@ -246,7 +246,7 @@ describe('core lifecycle handlers', () => {
         });
 
         it('accepts whitelisted requests without either an xsrf or version header', async () => {
-          await getSupertest(method.toLowerCase(), whitelistedTestPath).expect(200, 'ok');
+          await getSupertest(method.toLowerCase(), allowlistedTestPath).expect(200, 'ok');
         });
 
         it('accepts requests on a route with disabled xsrf protection', async () => {

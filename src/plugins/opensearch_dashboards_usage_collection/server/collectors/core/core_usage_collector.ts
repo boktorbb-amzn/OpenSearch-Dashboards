@@ -76,7 +76,7 @@ export function getCoreUsageCollector(
           },
           xsrf: {
             disableProtection: { type: 'boolean' },
-            whitelistConfigured: { type: 'boolean' },
+            allowlistConfigured: { type: 'boolean' },
           },
           requestId: {
             allowFromAnyIp: { type: 'boolean' },

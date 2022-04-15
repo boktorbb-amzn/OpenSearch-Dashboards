@@ -23,7 +23,8 @@ opensearch-dashboards
 ├── packages
 │   ├── bar
 │   └── foo
-└── ../opensearch-dashboards-extra/additional_projects (with-additional-projects)
-    ├── packages/baz
-    └── plugins/quux
+├── ../opensearch-dashboards-extra/additional_projects (with-additional-projects)
+│   ├── packages/baz
+│   └── plugins/quux
+└── plugins/corge
 `;

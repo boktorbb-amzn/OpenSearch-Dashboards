@@ -49,16 +49,6 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
-const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if ((settings.server?.xsrf?.whitelist ?? []).length > 0) {
-    log(
-      'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
-        'Instead, supply the "osd-xsrf" header.'
-    );
-  }
-  return settings;
-};
-
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
     log(
@@ -126,7 +116,9 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
 
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
+  rename,
   renameFromRoot,
+  renameFromRootWithoutMap,
 }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -154,10 +146,14 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
   unusedFromRoot('opensearch.preserveHost'),
   unusedFromRoot('opensearch.startupTimeout'),
+  rename('server.xsrf.whitelist', 'server.xsrf.allowlist'),
+  renameFromRootWithoutMap(
+    'server.compression.referrerWhitelist',
+    'server.compression.referrerAllowlist'
+  ),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
-  xsrfDeprecation,
 ];

@@ -114,6 +114,8 @@ export interface ConfigDeprecationFactory {
    * ```
    */
   renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
+  renameWithoutMap(oldKey: string, newKey: string): ConfigDeprecation;
+  renameFromRootWithoutMap(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
   /**
    * Remove a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the unused key was found and deprecation applied.

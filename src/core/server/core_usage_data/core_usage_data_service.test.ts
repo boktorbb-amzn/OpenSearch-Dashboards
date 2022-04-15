@@ -167,8 +167,8 @@ describe('CoreUsageDataService', () => {
                   "truststoreConfigured": false,
                 },
                 "xsrf": Object {
+                  "allowlistConfigured": false,
                   "disableProtection": false,
-                  "whitelistConfigured": false,
                 },
               },
               "logging": Object {
